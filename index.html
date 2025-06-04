@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Video Chat Demo</title>
+    <script src="https://unpkg.com/tailwindcss-jit-cdn"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Educational Video Chat Demo</h1>
+            
+            <div class="space-y-4">
+                <!-- Meeting Code Input -->
+                <div class="flex gap-2">
+                    <input type="text" id="meetingCode" placeholder="Enter meeting code" 
+                           class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <button id="joinBtn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition">
+                        Join Meeting
+                    </button>
+                </div>
+
+                <!-- Video Container -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative">
+                        <video id="localVideo" autoplay muted playsinline
+                               class="w-full h-64 bg-black rounded-lg object-cover"></video>
+                        <p class="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">You</p>
+                    </div>
+                    <div class="relative">
+                        <video id="remoteVideo" autoplay playsinline
+                               class="w-full h-64 bg-black rounded-lg object-cover"></video>
+                        <p class="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">Participant</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-center gap-4">
+                    <button id="micBtn" class="bg-gray-200 p-3 rounded-full hover:bg-gray-300 transition">
+                        <i class="bi bi-mic-fill text-xl"></i>
+                    </button>
+                    <button id="cameraBtn" class="bg-gray-200 p-3 rounded-full hover:bg-gray-300 transition">
+                        <i class="bi bi-camera-video-fill text-xl"></i>
+                    </button>
+                    <button id="endCallBtn" class="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition">
+                        <i class="bi bi-telephone-x-fill text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Safety Notice -->
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Safety Notice:</h2>
+                <ul class="list-disc ml-6 text-blue-700">
+                    <li>This is an educational demo only</li>
+                    <li>Only join meetings with people you know</li>
+                    <li>All communications should be appropriate and professional</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Basic WebRTC implementation
+        let localStream;
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const micBtn = document.getElementById('micBtn');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+
+        // Get user media
+        async function startMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                localVideo.srcObject = localStream;
+            } catch (err) {
+                console.error('Error accessing media devices:', err);
+                alert('Unable to access camera/microphone. Please check permissions.');
+            }
+        }
+
+        // Toggle controls
+        micBtn.addEventListener('click', () => {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                audioTrack.enabled = !audioTrack.enabled;
+                micBtn.classList.toggle('bg-red-200');
+            }
+        });
+
+        cameraBtn.addEventListener('click', () => {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                videoTrack.enabled = !videoTrack.enabled;
+                cameraBtn.classList.toggle('bg-red-200');
+            }
+        });
+
+        endCallBtn.addEventListener('click', () => {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localVideo.srcObject = null;
+                remoteVideo.srcObject = null;
+            }
+        });
+
+        // Start media on page load
+        document.addEventListener('DOMContentLoaded', startMedia);
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
